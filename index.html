@@ -1,82 +1,40 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>JRInvestments - Login</title>
-  <style>
-    body{font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#111;color:#fff}
-    .card{max-width:420px;padding:28px;border-radius:12px;background:rgba(255,255,255,0.04);text-align:center}
-    button{padding:12px 18px;border:none;border-radius:8px;background:#1a73e8;color:#fff;font-size:16px;cursor:pointer}
-    a{color:#1a73e8}
-    p.small{font-size:12px;color:#bbb}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>Entrar com Google</h2>
-    <p>Clique no botão para abrir o login do Google.</p>
-    <button id="start">Login com Google</button>
-    <p class="small">Se o redirecionamento não ocorrer automaticamente, use o botão “Abrir app”.</p>
-    <p style="margin-top:12px;">
-      <button id="openApp">Abrir app</button>
-    </p>
-    <p class="small">Página auto-redirecionadora criada por JRInvestments.</p>
-  </div>
-
 <script>
 (function(){
-  const CLIENT_ID = "1074062407140-e7t78dv5e2rj5euu14hftpquphqmjifl.apps.googleusercontent.com"; // substitua se necessário
-  const REDIRECT_URI = window.location.origin + window.location.pathname; // ex: https://vitoria9561.github.io/JRInvestments-/
+  const CLIENT_ID = "1074062407140-e7t78dv5e2rj5euu14hftpquphqmjifl.apps.googleusercontent.com";
+  const REDIRECT_URI = "com.vitoria.jrinvestments://callback"; // 👈 Corrigido
   const SCOPE = encodeURIComponent("openid email profile");
   const AUTH_URL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPE}&prompt=select_account`;
 
-  // Se já voltou do Google com token no fragment (#access_token=...), envia para o app
   function handleReturn() {
     const hash = window.location.hash || "";
     if (!hash) return false;
-    // O Google retorna no fragmento, ex: #access_token=XYZ&token_type=Bearer&expires_in=...
     const params = new URLSearchParams(hash.replace(/^#/, ""));
     const token = params.get("access_token");
     if (token) {
-      // Redireciona para o app com o token no fragmento
-      const appUrl = `com.vitoria.jrinvestments://callback#access_token=${encodeURIComponent(token)}&from=githubpages`;
-      // Tenta redirecionar (auto)
+      const appUrl = `${REDIRECT_URI}#access_token=${encodeURIComponent(token)}&from=githubpages`;
       window.location.href = appUrl;
       return true;
     }
     return false;
   }
 
-  // Se chegou com token, tenta enviar para o app
   if (handleReturn()) {
-    // se funcionou a navegação acima, ok — caso não abra app, mostramos botão para "Abrir app"
     console.log("Tentando redirecionar para app...");
   }
 
-  // Botão inicia o OAuth (vai para Google)
   document.getElementById("start").addEventListener("click", function(){
     window.location.href = AUTH_URL;
   });
 
-  // Botão abre app (fallback) — tenta abrir app sem token (útil se a página já extraiu token)
   document.getElementById("openApp").addEventListener("click", function(){
-    // Se a página tem token no hash, reenvia; senão tenta apenas abrir app (sem token)
     const hash = window.location.hash || "";
     const params = new URLSearchParams(hash.replace(/^#/, ""));
     const token = params.get("access_token");
     if (token) {
-      window.location.href = `com.vitoria.jrinvestments://callback#access_token=${encodeURIComponent(token)}&from=githubpages`;
+      window.location.href = `${REDIRECT_URI}#access_token=${encodeURIComponent(token)}&from=githubpages`;
     } else {
-      // tenta abrir app vazio (alguns browsers vão abrir app se instalado)
-      window.location.href = "com.vitoria.jrinvestments://callback";
+      window.location.href = REDIRECT_URI;
     }
   });
-
-  // Auto-click para iniciar fluxo (opcional). Você pode comentar se não quiser auto abrir:
-  // if (!window.location.hash) { setTimeout(()=>document.getElementById("start").click(), 400); }
-
 })();
 </script>
-</body>
-</html>
