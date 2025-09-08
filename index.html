@@ -1,17 +1,19 @@
 <script>
 (function(){
   const CLIENT_ID = "1074062407140-e7t78dv5e2rj5euu14hftpquphqmjifl.apps.googleusercontent.com";
-  const REDIRECT_URI = "com.vitoria.jrinvestments://callback"; // 👈 Corrigido
+  const REDIRECT_URI = "https://vitoria9561.github.io/JRInvestments-/"; // 👈 CORRETO
   const SCOPE = encodeURIComponent("openid email profile");
   const AUTH_URL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPE}&prompt=select_account`;
 
+  // Trata retorno do Google
   function handleReturn() {
     const hash = window.location.hash || "";
     if (!hash) return false;
     const params = new URLSearchParams(hash.replace(/^#/, ""));
     const token = params.get("access_token");
     if (token) {
-      const appUrl = `${REDIRECT_URI}#access_token=${encodeURIComponent(token)}&from=githubpages`;
+      // Redireciona para o app com token
+      const appUrl = `com.vitoria.jrinvestments://callback#access_token=${encodeURIComponent(token)}&from=githubpages`;
       window.location.href = appUrl;
       return true;
     }
@@ -19,21 +21,23 @@
   }
 
   if (handleReturn()) {
-    console.log("Tentando redirecionar para app...");
+    console.log("Token encontrado, enviando para o app...");
   }
 
+  // Botão Login → abre Google OAuth
   document.getElementById("start").addEventListener("click", function(){
     window.location.href = AUTH_URL;
   });
 
+  // Botão Abrir App → fallback
   document.getElementById("openApp").addEventListener("click", function(){
     const hash = window.location.hash || "";
     const params = new URLSearchParams(hash.replace(/^#/, ""));
     const token = params.get("access_token");
     if (token) {
-      window.location.href = `${REDIRECT_URI}#access_token=${encodeURIComponent(token)}&from=githubpages`;
+      window.location.href = `com.vitoria.jrinvestments://callback#access_token=${encodeURIComponent(token)}&from=githubpages`;
     } else {
-      window.location.href = REDIRECT_URI;
+      window.location.href = "com.vitoria.jrinvestments://callback";
     }
   });
 })();
