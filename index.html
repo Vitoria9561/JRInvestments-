@@ -1,46 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Login com Google</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>JRInvestments - Login</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #f9f9f9;
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #111;
+      color: #fff;
+      margin: 0;
     }
-    h1 {
-      color: #333;
+    .card {
+      max-width: 420px;
+      padding: 28px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      text-align: center;
     }
     button {
-      margin: 10px;
-      padding: 12px 20px;
-      font-size: 16px;
+      padding: 12px 18px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      background: #1a73e8;
+      color: #fff;
+      font-size: 16px;
       cursor: pointer;
-      background: #4285F4;
-      color: white;
+      margin-top: 12px;
     }
-    button:hover {
-      background: #3367d6;
+    a {
+      color: #1a73e8;
+    }
+    p.small {
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>Login com Google</h1>
-  <p>Clique abaixo para iniciar o login:</p>
-  <button id="start">Entrar com Google</button>
-  <button id="openApp">Abrir App</button>
+  <div class="card">
+    <h2>Entrar com Google</h2>
+    <p>Clique no botão para abrir o login do Google.</p>
+    <button id="start">Login com Google</button>
+    <p class="small">Se o redirecionamento não ocorrer automaticamente, use o botão “Abrir app”.</p>
+    <button id="openApp">Abrir app</button>
+    <p class="small">Página auto-redirecionadora criada por JRInvestments.</p>
+  </div>
 
   <script>
   (function(){
     const CLIENT_ID = "1074062407140-e7t78dv5e2rj5euu14hftpquphqmjifl.apps.googleusercontent.com";
-    const REDIRECT_URI = "com.vitoria.jrinvestments://callback";
+    const REDIRECT_URI = "com.vitoria.jrinvestments://callback"; // esquema customizado do app
     const SCOPE = encodeURIComponent("openid email profile");
     const AUTH_URL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPE}&prompt=select_account`;
 
+    // Função que tenta enviar token para o app
     function handleReturn() {
       const hash = window.location.hash || "";
       if (!hash) return false;
@@ -54,14 +73,15 @@
       return false;
     }
 
-    if (handleReturn()) {
-      console.log("Tentando redirecionar para app...");
-    }
+    // Tenta redirecionar automaticamente se o token já estiver no fragment
+    handleReturn();
 
+    // Botão inicia o OAuth (abre o Google)
     document.getElementById("start").addEventListener("click", function(){
       window.location.href = AUTH_URL;
     });
 
+    // Botão "Abrir app" para fallback
     document.getElementById("openApp").addEventListener("click", function(){
       const hash = window.location.hash || "";
       const params = new URLSearchParams(hash.replace(/^#/, ""));
@@ -69,9 +89,13 @@
       if (token) {
         window.location.href = `${REDIRECT_URI}#access_token=${encodeURIComponent(token)}&from=githubpages`;
       } else {
-        window.location.href = REDIRECT_URI;
+        window.location.href = REDIRECT_URI; // apenas abre o app
       }
     });
+
+    // Auto-click opcional (descomente se quiser abrir login automaticamente)
+    // if (!window.location.hash) { setTimeout(()=>document.getElementById("start").click(), 400); }
+
   })();
   </script>
 </body>
